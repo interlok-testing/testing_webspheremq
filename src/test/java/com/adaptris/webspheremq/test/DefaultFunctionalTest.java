@@ -1,6 +1,8 @@
 package com.adaptris.webspheremq.test;
 
 import com.adaptris.testing.DockerComposeFunctionalTest;
+import com.ibm.mq.MQQueueManager;
+import com.ibm.mq.constants.MQConstants;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -9,16 +11,27 @@ import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.time.Duration;
+import java.util.Hashtable;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class DefaultFunctionalTest extends DockerComposeFunctionalTest {
+
+
+    private MQQueueManager queueManager;
 
     protected static String INTERLOK_SERVICE_NAME = "interlok-1";
     protected static int INTERLOK_PORT = 8080;
     protected static String WEBSPHEREMQ_SERVICE_NAME = "webspheremq-1";
     protected static int WEBSPHEREMQ_PORT = 1414;
 
-    private static final String QUEUE_NAME = "TEST.SEND.QUEUE";
+    private static final String HOST = "webspheremq-1";
+
+    private final String QUEUE_NAME = "DEV.QUEUE.1";
+    private final String QUEUE_MANAGER_NAME = "QM1";
+    private final String CHANNEL = "DEV.APP.SVRCONN";
+
     private static final String TEST_MESSAGE = "Hello WebSphere MQ!";
     private static final String XML_MESSAGE = "<message><id>123</id><content>Test XML</content></message>";
 
@@ -37,19 +50,30 @@ public class DefaultFunctionalTest extends DockerComposeFunctionalTest {
         return "http://" + address.getHostString() + ":" + address.getPort() + path;
     }
 
+
     @Test
     public void test() throws Exception {
         Thread.sleep(10000);
         InetSocketAddress address = getHostAddressForService(INTERLOK_SERVICE_NAME, INTERLOK_PORT);
         String bootstrapServers = address.getHostString() + ":" + WEBSPHEREMQ_PORT;
 
-        Properties mqProperties = new Properties();
-        mqProperties.setProperty("mq.queueManager", QUEUE_NAME);
-        mqProperties.setProperty("mq.host", "localhost");
-        mqProperties.setProperty("mq.port", String.valueOf(WEBSPHEREMQ_PORT));
-        mqProperties.setProperty("mq.channel", "TEST.CHANNEL");
-        mqProperties.setProperty("mq.queue.input", "INPUT.QUEUE");
-        mqProperties.setProperty("mq.queue.output", "OUTPUT.QUEUE");
+        Hashtable<String, Object> props = new Hashtable<>();
+        props.put(MQConstants.TRANSPORT_PROPERTY, MQConstants.TRANSPORT_MQSERIES_CLIENT);
+        props.put(MQConstants.HOST_NAME_PROPERTY, HOST);
+        props.put(MQConstants.PORT_PROPERTY, WEBSPHEREMQ_PORT);
+        props.put(MQConstants.CHANNEL_PROPERTY, CHANNEL);
+
+        queueManager = new MQQueueManager(QUEUE_MANAGER_NAME, props);
+
+        assertTrue(queueManager.isConnected(), "Should be connected to MQ");
+
+//        Properties mqProperties = new Properties();
+//        mqProperties.setProperty("mq.queueManager", QUEUE_NAME);
+//        mqProperties.setProperty("mq.host", "localhost");
+//        mqProperties.setProperty("mq.port", String.valueOf(WEBSPHEREMQ_PORT));
+//        mqProperties.setProperty("mq.channel", "TEST.CHANNEL");
+//        mqProperties.setProperty("mq.queue.input", "INPUT.QUEUE");
+//        mqProperties.setProperty("mq.queue.output", "OUTPUT.QUEUE");
 
 //        WebSphereMQService mqService = new WebSphereMQService(mqProperties);
     }

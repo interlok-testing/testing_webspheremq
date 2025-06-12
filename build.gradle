@@ -23,5 +23,6 @@ dependencies {
   testImplementation group: "com.adaptris", name: "interlok-testing-common", version: "$interlokTestingVersion"
   testImplementation "io.rest-assured:rest-assured:$restAssuredVersion"
   testImplementation "io.rest-assured:json-path:$restAssuredVersion"
+  testImplementation "com.ibm.mq:com.ibm.mq.allclient:9.3.0.0"
   interlokJavadocs group: "com.adaptris", name: "interlok-webspheremq", version: "$interlokVersion", classifier: "javadoc", changing: true, transitive: false
 }
