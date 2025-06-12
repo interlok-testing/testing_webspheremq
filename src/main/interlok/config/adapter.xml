@@ -13,7 +13,7 @@
           <transport-type>MQJMS_TP_CLIENT_MQ_TCPIP</transport-type>
           <queue-manager>DevQueueManager</queue-manager>
           <channel>DEV.APP.SVRCONN</channel>
-          <broker-host>localhost</broker-host>
+          <broker-host>webspheremq-1</broker-host>
           <broker-port>1414</broker-port>
         </vendor-implementation>
       </jms-connection>

@@ -1,11 +1,14 @@
 version: '2'
 
 services:
+  interlok:
+    hostname: interlok-1
+    build:
+      context: .
+      dockerfile: dockerfile
   webspheremq:
     image: 'docker.io/ibmcom/mq:latest'
-    ports:
-      - '1414:1414'
-      - '9157:9157'
+    hostname: 'webspheremq-1'
     environment:
       - MQ_ADMIN_PASSWORD=admin
       - MQ_APP_PASSWORD=admin
