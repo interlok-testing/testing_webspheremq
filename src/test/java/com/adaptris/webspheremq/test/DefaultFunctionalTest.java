@@ -12,7 +12,6 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Hashtable;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,22 +44,21 @@ public class DefaultFunctionalTest extends DockerComposeFunctionalTest {
     }
 
     protected String getInterlokEndpoint(String path) {
-        InetSocketAddress address = getHostAddressForService(INTERLOK_SERVICE_NAME, INTERLOK_PORT);
+        InetSocketAddress address = getHostAddressForService(WEBSPHEREMQ_SERVICE_NAME, WEBSPHEREMQ_PORT);
         if (!path.startsWith("/")) path = "/" + path;
-        return "http://" + address.getHostString() + ":" + address.getPort() + path;
+        return "tcp://" + address.getHostString() + ":" + address.getPort() + path;
     }
 
 
     @Test
     public void test() throws Exception {
         Thread.sleep(10000);
-        InetSocketAddress address = getHostAddressForService(INTERLOK_SERVICE_NAME, INTERLOK_PORT);
-        String bootstrapServers = address.getHostString() + ":" + WEBSPHEREMQ_PORT;
+        InetSocketAddress mgmt = getHostAddressForService(WEBSPHEREMQ_SERVICE_NAME, WEBSPHEREMQ_PORT);
 
         Hashtable<String, Object> props = new Hashtable<>();
         props.put(MQConstants.TRANSPORT_PROPERTY, MQConstants.TRANSPORT_MQSERIES_CLIENT);
-        props.put(MQConstants.HOST_NAME_PROPERTY, HOST);
-        props.put(MQConstants.PORT_PROPERTY, WEBSPHEREMQ_PORT);
+        props.put(MQConstants.HOST_NAME_PROPERTY, mgmt.getHostName());
+        props.put(MQConstants.PORT_PROPERTY, String.valueOf(mgmt.getPort()));
         props.put(MQConstants.CHANNEL_PROPERTY, CHANNEL);
 
         queueManager = new MQQueueManager(QUEUE_MANAGER_NAME, props);
